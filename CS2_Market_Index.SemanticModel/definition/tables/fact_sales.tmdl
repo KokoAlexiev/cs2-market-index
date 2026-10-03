@@ -1,0 +1,202 @@
+table fact_sales
+
+	measure Sales = COUNTROWS ( fact_sales )
+		formatString: #,0
+
+	measure 'Sales Value' = SUM ( fact_sales[price] )
+		formatString: \$#,0
+
+	measure 'Avg Sale Price' = AVERAGE ( fact_sales[price] )
+		formatString: \$#,0.00
+
+	measure 'Median Markup %' = MEDIAN ( fact_sales[markup_pct] )
+		formatString: #,0.0
+
+	measure 'Market Index' = CALCULATE ( MEDIAN ( fact_sales[price_relative] ), fact_sales[in_index] = TRUE () ) * 100
+		formatString: #,0.0
+
+	measure 'Market Index 7d Avg' =
+			AVERAGEX (
+			    DATESINPERIOD ( dim_date[date], MAX ( dim_date[date] ), -7, DAY ),
+			    [Market Index]
+			)
+		formatString: #,0.0
+
+	measure 'Index Change vs Base' = [Market Index] - 100
+		formatString: +#,0.0;-#,0.0;0
+
+	measure 'Index Change 7d Avg' = [Market Index 7d Avg] - 100
+		formatString: +#,0.0;-#,0.0;0
+
+	measure 'Rows With DQ Issue' = CALCULATE ( [Sales], fact_sales[dq_any_issue] = TRUE () )
+		formatString: #,0
+
+	measure 'DQ Issue Rate %' = DIVIDE ( [Rows With DQ Issue], [Sales] ) * 100
+		formatString: #,0.00
+
+	measure 'Missing Buff Price' = CALCULATE ( [Sales], fact_sales[dq_missing_buff] = TRUE () )
+		formatString: #,0
+
+	measure 'Extreme Markups' = CALCULATE ( [Sales], fact_sales[dq_extreme_markup] = TRUE () )
+		formatString: #,0
+
+	measure 'Avg Liquidity' = AVERAGE ( fact_sales[liquidity_pct] )
+		formatString: #,0.0
+
+	measure 'Avg Buff %' = CALCULATE ( AVERAGE ( fact_sales[buff_pct] ), fact_sales[dq_extreme_buff_ratio] = FALSE () )
+		formatString: #,0.0
+
+	column sale_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: sale_id
+
+	column sale_ts
+		dataType: dateTime
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: sale_ts
+
+	column sale_date
+		dataType: dateTime
+		formatString: Long Date
+		summarizeBy: none
+		sourceColumn: sale_date
+
+	column item_id
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: item_id
+
+	column price
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: price
+
+	column markup_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: markup_pct
+
+	column buff_price
+		dataType: double
+		summarizeBy: none
+		sourceColumn: buff_price
+
+	column buff_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: buff_pct
+
+	column csfloat_price
+		dataType: double
+		summarizeBy: none
+		sourceColumn: csfloat_price
+
+	column float_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: float_pct
+
+	column stickers_value
+		dataType: double
+		summarizeBy: none
+		sourceColumn: stickers_value
+
+	column liquidity_pct
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: liquidity_pct
+
+	column blacklisted
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: blacklisted
+
+	column base_price
+		dataType: double
+		summarizeBy: none
+		sourceColumn: base_price
+
+	column price_relative
+		dataType: double
+		summarizeBy: none
+		sourceColumn: price_relative
+
+	column in_index
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: in_index
+
+	column dq_missing_buff
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: dq_missing_buff
+
+	column dq_missing_float
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: dq_missing_float
+
+	column dq_extreme_markup
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: dq_extreme_markup
+
+	column dq_extreme_buff_ratio
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: dq_extreme_buff_ratio
+
+	column dq_any_issue
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: dq_any_issue
+
+	column price_band = SWITCH ( TRUE (), fact_sales[price] < 25, "< $25", fact_sales[price] < 50, "$25-50", fact_sales[price] < 100, "$50-100", fact_sales[price] < 250, "$100-250", fact_sales[price] < 500, "$250-500", fact_sales[price] < 1000, "$500-1k", fact_sales[price] < 2500, "$1k-2.5k", ">= $2.5k" )
+		dataType: string
+		summarizeBy: none
+		sortByColumn: price_band_ord
+
+	column price_band_ord = SWITCH ( TRUE (), fact_sales[price] < 25, 0, fact_sales[price] < 50, 1, fact_sales[price] < 100, 2, fact_sales[price] < 250, 3, fact_sales[price] < 500, 4, fact_sales[price] < 1000, 5, fact_sales[price] < 2500, 6, 7 )
+		dataType: int64
+		isHidden
+		summarizeBy: none
+
+	column markup_band = SWITCH ( TRUE (), fact_sales[markup_pct] <= 0, "<= 0%", fact_sales[markup_pct] <= 2, "0-2%", fact_sales[markup_pct] <= 4, "2-4%", fact_sales[markup_pct] <= 6, "4-6%", fact_sales[markup_pct] <= 8, "6-8%", fact_sales[markup_pct] <= 10, "8-10%", fact_sales[markup_pct] <= 12, "10-12%", "> 12%" )
+		dataType: string
+		summarizeBy: none
+		sortByColumn: markup_band_ord
+
+	column markup_band_ord = SWITCH ( TRUE (), fact_sales[markup_pct] <= 0, 0, fact_sales[markup_pct] <= 2, 1, fact_sales[markup_pct] <= 4, 2, fact_sales[markup_pct] <= 6, 3, fact_sales[markup_pct] <= 8, 4, fact_sales[markup_pct] <= 10, 5, fact_sales[markup_pct] <= 12, 6, 7 )
+		dataType: int64
+		isHidden
+		summarizeBy: none
+
+	column liq_band = SWITCH ( TRUE (), fact_sales[liquidity_pct] < 20, "0-20", fact_sales[liquidity_pct] < 40, "20-40", fact_sales[liquidity_pct] < 60, "40-60", fact_sales[liquidity_pct] < 80, "60-80", "80-100" )
+		dataType: string
+		summarizeBy: none
+		sortByColumn: liq_band_ord
+
+	column liq_band_ord = SWITCH ( TRUE (), fact_sales[liquidity_pct] < 20, 0, fact_sales[liquidity_pct] < 40, 1, fact_sales[liquidity_pct] < 60, 2, fact_sales[liquidity_pct] < 80, 3, 4 )
+		dataType: int64
+		isHidden
+		summarizeBy: none
+
+	partition fact_sales = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document ( File.Contents ( DataFolder & "fact_sales.csv" ), [Delimiter = ",", Columns = 21, Encoding = 65001, QuoteStyle = QuoteStyle.Csv] ),
+				    Promoted = Table.PromoteHeaders ( Source, [PromoteAllScalars = true] ),
+				    Typed = Table.TransformColumnTypes ( Promoted, {
+				        {"sale_id", type text}, {"sale_ts", type datetime}, {"sale_date", type date},
+				        {"item_id", Int64.Type}, {"price", type number}, {"markup_pct", type number},
+				        {"buff_price", type number}, {"buff_pct", type number}, {"csfloat_price", type number},
+				        {"float_pct", type number}, {"stickers_value", type number}, {"liquidity_pct", Int64.Type},
+				        {"blacklisted", type logical}, {"base_price", type number}, {"price_relative", type number},
+				        {"in_index", type logical}, {"dq_missing_buff", type logical}, {"dq_missing_float", type logical},
+				        {"dq_extreme_markup", type logical}, {"dq_extreme_buff_ratio", type logical}, {"dq_any_issue", type logical}
+				    }, "en-US" )
+				in
+				    Typed

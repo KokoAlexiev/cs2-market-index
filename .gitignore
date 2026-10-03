@@ -1,0 +1,28 @@
+# Raw / source data — never publish (portfolio rule)
+data/
+*.csv
+
+# Power BI Desktop local caches (not part of the project definition)
+*.Report/.pbi/localSettings.json
+*.SemanticModel/.pbi/localSettings.json
+.pbi/
+*.pbix.tmp
+~$*
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# local probe/ground-truth artifacts
+probe.pbix
+probe/
+
+# Internal/dev docs — keep local, not for the public repo
+HANDOFF.md
+POWERBI_STEPS.txt
+BUILD_AND_PUBLISH.md

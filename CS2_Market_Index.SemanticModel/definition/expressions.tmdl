@@ -1,0 +1,5 @@
+/// Folder that holds fact_sales.csv, dim_item.csv and dim_date.csv.
+/// Edit this one value (Home > Transform data > Manage Parameters) to point at
+/// your local copy of the data folder, then Refresh. Keep the trailing backslash.
+expression DataFolder = "C:\path\to\cs2-market-index\data\" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	annotation PBI_ResultType = Text
