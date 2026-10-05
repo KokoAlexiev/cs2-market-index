@@ -66,6 +66,44 @@ of sales and flagged rows.
 
 ![Data Quality page](screenshots/5-data-quality.png)
 
+## Why these charts
+
+I chose each chart from the task it has to serve and the kind of data behind it, following the
+popular visualization framework by Tamara Munzner (what, why, how). Data is either quantitative (a
+number), ordered (a natural order to it), or categorical (names with no order).
+
+Price & Trend
+
+- Four cards (index, change since May, sales, sales value): single quantitative values. Task: look up the headline numbers at a glance.
+- Index over time with a 7 day average: time (ordered) against the index (quantitative). Task: see the trend. A line, because time runs along the x axis and the value reads off the y axis.
+- Index by category: the same, split by category (categorical). Task: compare the trend between categories. One line per category, colour for category.
+- Category, wear, StatTrak and date slicers: categorical and time. Task: filter the whole page.
+
+Distributions
+
+- Sales by price band, by markup band, by liquidity band: one quantitative attribute each, binned, with a count. Task: see the shape of each. Histograms, because the shape matters more than any total. Markup sits in a tight band, which a histogram shows and a scatter would waste.
+- Average price by wear: wear (ordered) against price (quantitative). Task: compare price across wear. A bar kept in wear order (Factory New to Battle-Scarred), not alphabetical, because wear is ordered.
+
+Volume & Composition
+
+- Most sold items: item (categorical) against a count. Task: identify and rank the top items. A ranked bar, top fifteen.
+- Value by category: category against total value (quantitative), as parts of a whole. Task: see how the value splits across categories. A treemap.
+- Sales by category: category against a count. Task: compare volume across categories. A bar.
+- Sales by weekday: weekday (ordered) against a count. Task: compare volume across the week. A column chart in weekday order.
+
+Relationships & Reference
+
+- Price against volume per category, sized by value: two quantitative attributes plus a size. Task: see how price and volume relate across categories. A bubble scatter.
+- Price against liquidity per weapon: two quantitative attributes. Task: see whether price and liquidity move together. A scatter aggregated to the weapon, not every sale, so 5,500 items don't become an unreadable cloud.
+- Average price against the Buff reference per category: category against a ratio (quantitative). Task: compare how sale prices sit against Buff across categories. A bar.
+- Price by category, StatTrak against standard: category and a yes/no split against price. Task: compare StatTrak and non-StatTrak prices. A grouped column.
+
+Data Quality
+
+- Four cards (flagged rows, issue rate, missing Buff prices, extreme markups): single quantitative values. Task: look up the headline quality numbers.
+- Issue rate by month: month (ordered) against a rate (quantitative). Task: see whether quality changes over time. A column chart by month.
+- Per item table: item (categorical) against sales and flagged counts (quantitative). Task: look up exact numbers and find the worst items. A sortable table.
+
 ## How the index works
 
 Every sale is compared to what that same item usually sold for in May. So if an AK sold for 90
