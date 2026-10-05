@@ -1,50 +1,52 @@
 table dim_item
+	lineageTag: 6643d22d-6c08-4ea6-83db-2b7f28718563
 
 	column item_id
 		dataType: int64
 		isKey
+		lineageTag: f715a2f5-53a1-4b66-9e19-e5919476da9f
 		summarizeBy: none
 		sourceColumn: item_id
 
 	column item
 		dataType: string
+		lineageTag: 0783e33c-1af9-48cf-8a7d-516f98311225
 		summarizeBy: none
 		sourceColumn: item
 
 	column weapon
 		dataType: string
+		lineageTag: d1539c68-49d2-459c-be2f-0aff5157cf1c
 		summarizeBy: none
 		sourceColumn: weapon
 
 	column skin
 		dataType: string
+		lineageTag: 9120089e-f25d-4a77-a96e-f4f9cfc46e1d
 		summarizeBy: none
 		sourceColumn: skin
 
 	column wear
 		dataType: string
+		lineageTag: dab08db7-13df-48d2-83d5-cf1511314fe2
 		summarizeBy: none
 		sourceColumn: wear
-		sortByColumn: wear_ord
-
-	column wear_ord
-		dataType: int64
-		isHidden
-		summarizeBy: none
-		sourceColumn: wear_ord
 
 	column stattrak
 		dataType: boolean
+		lineageTag: 90bd8d37-7751-4615-a17c-46c46d93f0fe
 		summarizeBy: none
 		sourceColumn: stattrak
 
 	column souvenir
 		dataType: boolean
+		lineageTag: b63a5948-39af-473c-8948-356e3d27fd5c
 		summarizeBy: none
 		sourceColumn: souvenir
 
 	column category
 		dataType: string
+		lineageTag: 328baafe-0912-4bdf-ba3a-537e2d391dcf
 		summarizeBy: none
 		sourceColumn: category
 
@@ -52,16 +54,14 @@ table dim_item
 		mode: import
 		source =
 				let
-				    Source = Csv.Document ( File.Contents ( DataFolder & "dim_item.csv" ), [Delimiter = ",", Columns = 8, Encoding = 65001, QuoteStyle = QuoteStyle.Csv] ),
-				    Promoted = Table.PromoteHeaders ( Source, [PromoteAllScalars = true] ),
-				    Typed = Table.TransformColumnTypes ( Promoted, {
-				        {"item_id", Int64.Type}, {"item", type text}, {"weapon", type text},
-				        {"skin", type text}, {"wear", type text}, {"stattrak", type logical},
-				        {"souvenir", type logical}, {"category", type text}
-				    }, "en-US" ),
-				    WithOrd = Table.AddColumn ( Typed, "wear_ord", each
-				        let w = [wear] in
-				        if w = "Factory New" then 1 else if w = "Minimal Wear" then 2 else if w = "Field-Tested" then 3
-				        else if w = "Well-Worn" then 4 else if w = "Battle-Scarred" then 5 else 6, Int64.Type )
-				in
-				    WithOrd
+				      Source = Databricks.Catalogs("dbc-5d3b626b-f098.cloud.databricks.com", "/sql/1.0/warehouses/d9281e4c5a9f576a", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				      Cat = Source{[Name="workspace"]}[Data],
+				      Sch = Cat{[Name="default"]}[Data],
+				      Tbl = Sch{[Name="dim_item"]}[Data]
+				  in
+				      Tbl
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

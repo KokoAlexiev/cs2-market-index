@@ -5,3 +5,4 @@ relationship fact_item
 relationship fact_date
 	fromColumn: fact_sales.sale_date
 	toColumn: dim_date.date
+

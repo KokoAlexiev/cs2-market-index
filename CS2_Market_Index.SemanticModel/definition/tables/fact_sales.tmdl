@@ -1,19 +1,25 @@
 table fact_sales
+	lineageTag: 3a6fedd2-77cf-47d5-85ff-93cbdcc1d612
 
 	measure Sales = COUNTROWS ( fact_sales )
 		formatString: #,0
+		lineageTag: a2cbf969-82a9-42e0-8df1-ed221302db48
 
 	measure 'Sales Value' = SUM ( fact_sales[price] )
 		formatString: \$#,0
+		lineageTag: a1ec61cc-b471-46af-bbc4-d8215ef19cba
 
 	measure 'Avg Sale Price' = AVERAGE ( fact_sales[price] )
 		formatString: \$#,0.00
+		lineageTag: 7ef864c7-e38a-48ee-9ef4-b4c955a12ae2
 
 	measure 'Median Markup %' = MEDIAN ( fact_sales[markup_pct] )
 		formatString: #,0.0
+		lineageTag: 5ca8e50a-9061-45cc-8448-7111b4d32f14
 
 	measure 'Market Index' = CALCULATE ( MEDIAN ( fact_sales[price_relative] ), fact_sales[in_index] = TRUE () ) * 100
 		formatString: #,0.0
+		lineageTag: 6c53ffd7-4427-4ba2-8dd1-065f7b636927
 
 	measure 'Market Index 7d Avg' =
 			AVERAGEX (
@@ -21,182 +27,226 @@ table fact_sales
 			    [Market Index]
 			)
 		formatString: #,0.0
+		lineageTag: 9e6354f2-5c7c-45c1-bd28-21021997133a
 
 	measure 'Index Change vs Base' = [Market Index] - 100
 		formatString: +#,0.0;-#,0.0;0
+		lineageTag: 37e14f28-ac09-41f5-816d-84ade6e901bc
 
 	measure 'Index Change 7d Avg' = [Market Index 7d Avg] - 100
 		formatString: +#,0.0;-#,0.0;0
+		lineageTag: 7a4d3b82-a141-40cf-bf1f-9428a1cf44a4
 
 	measure 'Rows With DQ Issue' = CALCULATE ( [Sales], fact_sales[dq_any_issue] = TRUE () )
 		formatString: #,0
+		lineageTag: 981d8ebf-8c51-496b-912a-6fa8ab12492c
 
 	measure 'DQ Issue Rate %' = DIVIDE ( [Rows With DQ Issue], [Sales] ) * 100
 		formatString: #,0.00
+		lineageTag: b759c798-993b-4010-bf46-48acb97a8190
 
 	measure 'Missing Buff Price' = CALCULATE ( [Sales], fact_sales[dq_missing_buff] = TRUE () )
 		formatString: #,0
+		lineageTag: ea6eaa3a-6010-450e-ad7f-f2f0aaa64678
 
 	measure 'Extreme Markups' = CALCULATE ( [Sales], fact_sales[dq_extreme_markup] = TRUE () )
 		formatString: #,0
+		lineageTag: 693b5474-24de-41d1-bcc7-96e34ffce7e2
 
 	measure 'Avg Liquidity' = AVERAGE ( fact_sales[liquidity_pct] )
 		formatString: #,0.0
+		lineageTag: d5e80c54-b520-4c88-8220-ce2e8895ee87
 
 	measure 'Avg Buff %' = CALCULATE ( AVERAGE ( fact_sales[buff_pct] ), fact_sales[dq_extreme_buff_ratio] = FALSE () )
 		formatString: #,0.0
+		lineageTag: 24a0d8a6-9d5a-4713-bbca-172c9228628e
 
 	column sale_id
-		dataType: string
-		summarizeBy: none
+		dataType: int64
+		formatString: 0
+		lineageTag: 0ceaf1bb-c52b-4bb9-8f6a-7c68cd740b88
+		summarizeBy: sum
 		sourceColumn: sale_id
 
+		annotation SummarizationSetBy = Automatic
+
 	column sale_ts
-		dataType: dateTime
-		formatString: General Date
+		dataType: string
+		lineageTag: 4c18aaf2-6beb-4774-9799-f832f3074b19
 		summarizeBy: none
 		sourceColumn: sale_ts
+
+		annotation SummarizationSetBy = Automatic
 
 	column sale_date
 		dataType: dateTime
 		formatString: Long Date
+		lineageTag: 0bf381ef-8545-455c-9e5a-f07b3e8634fa
 		summarizeBy: none
 		sourceColumn: sale_date
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column item_id
 		dataType: int64
+		lineageTag: 3e765e89-f7c2-424b-9ea0-0111a2027e93
 		summarizeBy: none
 		sourceColumn: item_id
 
 	column price
 		dataType: double
+		lineageTag: 42256a8e-79e9-4cc1-be44-aebf330ee942
 		summarizeBy: sum
 		sourceColumn: price
 
 	column markup_pct
 		dataType: double
+		lineageTag: 619fe3ff-5880-4d0d-af22-085d313147ff
 		summarizeBy: none
 		sourceColumn: markup_pct
 
 	column buff_price
 		dataType: double
+		lineageTag: 13e49f43-b6de-4fd1-9561-b8f7f0827d4e
 		summarizeBy: none
 		sourceColumn: buff_price
 
 	column buff_pct
 		dataType: double
+		lineageTag: 62ac8122-cb37-453b-ab35-e628827e15a7
 		summarizeBy: none
 		sourceColumn: buff_pct
 
 	column csfloat_price
 		dataType: double
+		lineageTag: 0c665a8d-5a94-4cf2-89c7-d5aa778d3657
 		summarizeBy: none
 		sourceColumn: csfloat_price
 
 	column float_pct
 		dataType: double
+		lineageTag: e75fd945-22da-4a09-8d75-7985fbe8edcc
 		summarizeBy: none
 		sourceColumn: float_pct
 
 	column stickers_value
 		dataType: double
+		lineageTag: e275decc-7ff7-48d5-a2b6-7763684232f0
 		summarizeBy: none
 		sourceColumn: stickers_value
 
 	column liquidity_pct
-		dataType: int64
-		summarizeBy: none
+		dataType: double
+		lineageTag: df357812-87a7-487e-b984-7d7dd1279906
+		summarizeBy: sum
 		sourceColumn: liquidity_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column blacklisted
 		dataType: boolean
+		lineageTag: 11896c8b-9ebf-4921-8030-6e4d274676a6
 		summarizeBy: none
 		sourceColumn: blacklisted
 
 	column base_price
 		dataType: double
+		lineageTag: d9971d8c-5e0e-4af8-9d3b-ba404a9af113
 		summarizeBy: none
 		sourceColumn: base_price
 
 	column price_relative
 		dataType: double
+		lineageTag: 9434a255-3320-495f-a3b3-6f00312c62ae
 		summarizeBy: none
 		sourceColumn: price_relative
 
 	column in_index
 		dataType: boolean
+		lineageTag: 86329e1e-9578-4ecf-82d3-34ad669c61b1
 		summarizeBy: none
 		sourceColumn: in_index
 
 	column dq_missing_buff
 		dataType: boolean
+		lineageTag: d295f6dd-f317-4513-8a2b-1c04dd2bb886
 		summarizeBy: none
 		sourceColumn: dq_missing_buff
 
 	column dq_missing_float
 		dataType: boolean
+		lineageTag: 16a9c2c0-56b0-4190-a4e1-4936e453713d
 		summarizeBy: none
 		sourceColumn: dq_missing_float
 
 	column dq_extreme_markup
 		dataType: boolean
+		lineageTag: f32af039-ce40-4c93-82d1-e206fe2d1af2
 		summarizeBy: none
 		sourceColumn: dq_extreme_markup
 
 	column dq_extreme_buff_ratio
 		dataType: boolean
+		lineageTag: a2453aaa-fa23-4bbf-81d4-cba03d55a1b3
 		summarizeBy: none
 		sourceColumn: dq_extreme_buff_ratio
 
 	column dq_any_issue
 		dataType: boolean
+		lineageTag: fb4f2840-b98d-43b5-bb1f-1eb4ecf59b53
 		summarizeBy: none
 		sourceColumn: dq_any_issue
 
 	column price_band = SWITCH ( TRUE (), fact_sales[price] < 25, "< $25", fact_sales[price] < 50, "$25-50", fact_sales[price] < 100, "$50-100", fact_sales[price] < 250, "$100-250", fact_sales[price] < 500, "$250-500", fact_sales[price] < 1000, "$500-1k", fact_sales[price] < 2500, "$1k-2.5k", ">= $2.5k" )
 		dataType: string
+		lineageTag: b7f21f18-6226-4a48-b02a-992e0e26c726
 		summarizeBy: none
 		sortByColumn: price_band_ord
 
 	column price_band_ord = SWITCH ( TRUE (), fact_sales[price] < 25, 0, fact_sales[price] < 50, 1, fact_sales[price] < 100, 2, fact_sales[price] < 250, 3, fact_sales[price] < 500, 4, fact_sales[price] < 1000, 5, fact_sales[price] < 2500, 6, 7 )
 		dataType: int64
 		isHidden
+		lineageTag: 97d23a3b-32df-4ee0-bbc7-0672ac5cfbda
 		summarizeBy: none
 
 	column markup_band = SWITCH ( TRUE (), fact_sales[markup_pct] <= 0, "<= 0%", fact_sales[markup_pct] <= 2, "0-2%", fact_sales[markup_pct] <= 4, "2-4%", fact_sales[markup_pct] <= 6, "4-6%", fact_sales[markup_pct] <= 8, "6-8%", fact_sales[markup_pct] <= 10, "8-10%", fact_sales[markup_pct] <= 12, "10-12%", "> 12%" )
 		dataType: string
+		lineageTag: a048950b-e33f-4a5d-a9e1-095c7e04dcb3
 		summarizeBy: none
 		sortByColumn: markup_band_ord
 
 	column markup_band_ord = SWITCH ( TRUE (), fact_sales[markup_pct] <= 0, 0, fact_sales[markup_pct] <= 2, 1, fact_sales[markup_pct] <= 4, 2, fact_sales[markup_pct] <= 6, 3, fact_sales[markup_pct] <= 8, 4, fact_sales[markup_pct] <= 10, 5, fact_sales[markup_pct] <= 12, 6, 7 )
 		dataType: int64
 		isHidden
+		lineageTag: 5af63285-5c3b-4c8b-b40c-233fc83f650e
 		summarizeBy: none
 
 	column liq_band = SWITCH ( TRUE (), fact_sales[liquidity_pct] < 20, "0-20", fact_sales[liquidity_pct] < 40, "20-40", fact_sales[liquidity_pct] < 60, "40-60", fact_sales[liquidity_pct] < 80, "60-80", "80-100" )
 		dataType: string
+		lineageTag: 228d0354-21c7-4f33-a6b0-25f68fd21d56
 		summarizeBy: none
 		sortByColumn: liq_band_ord
 
 	column liq_band_ord = SWITCH ( TRUE (), fact_sales[liquidity_pct] < 20, 0, fact_sales[liquidity_pct] < 40, 1, fact_sales[liquidity_pct] < 60, 2, fact_sales[liquidity_pct] < 80, 3, 4 )
 		dataType: int64
 		isHidden
+		lineageTag: 5bdc948d-6321-4eb6-b9fe-c38ec540dc15
 		summarizeBy: none
 
 	partition fact_sales = m
 		mode: import
 		source =
 				let
-				    Source = Csv.Document ( File.Contents ( DataFolder & "fact_sales.csv" ), [Delimiter = ",", Columns = 21, Encoding = 65001, QuoteStyle = QuoteStyle.Csv] ),
-				    Promoted = Table.PromoteHeaders ( Source, [PromoteAllScalars = true] ),
-				    Typed = Table.TransformColumnTypes ( Promoted, {
-				        {"sale_id", type text}, {"sale_ts", type datetime}, {"sale_date", type date},
-				        {"item_id", Int64.Type}, {"price", type number}, {"markup_pct", type number},
-				        {"buff_price", type number}, {"buff_pct", type number}, {"csfloat_price", type number},
-				        {"float_pct", type number}, {"stickers_value", type number}, {"liquidity_pct", Int64.Type},
-				        {"blacklisted", type logical}, {"base_price", type number}, {"price_relative", type number},
-				        {"in_index", type logical}, {"dq_missing_buff", type logical}, {"dq_missing_float", type logical},
-				        {"dq_extreme_markup", type logical}, {"dq_extreme_buff_ratio", type logical}, {"dq_any_issue", type logical}
-				    }, "en-US" )
-				in
-				    Typed
+				      Source = Databricks.Catalogs("dbc-5d3b626b-f098.cloud.databricks.com", "/sql/1.0/warehouses/d9281e4c5a9f576a", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				      Cat = Source{[Name="workspace"]}[Data],
+				      Sch = Cat{[Name="default"]}[Data],
+				      Tbl = Sch{[Name="fact_sales"]}[Data]
+				  in
+				      Tbl
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

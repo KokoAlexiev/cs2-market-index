@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "pliq",
   "position": {
     "x": 652,
     "y": 16,
     "z": 0,
-    "width": 612,
     "height": 340,
+    "width": 612,
     "tabOrder": 0
   },
   "visual": {
@@ -32,6 +32,24 @@
             }
           ]
         },
+        "Size": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_sales"
+                    }
+                  },
+                  "Property": "Sales"
+                }
+              },
+              "queryRef": "fact_sales.Sales",
+              "nativeQueryRef": "Sales"
+            }
+          ]
+        },
         "X": {
           "projections": [
             {
@@ -46,7 +64,8 @@
                 }
               },
               "queryRef": "fact_sales.Avg Sale Price",
-              "nativeQueryRef": "Avg Sale Price"
+              "nativeQueryRef": "Avg Sale Price",
+              "active": true
             }
           ]
         },
@@ -65,24 +84,6 @@
               },
               "queryRef": "fact_sales.Avg Liquidity",
               "nativeQueryRef": "Avg Liquidity"
-            }
-          ]
-        },
-        "Size": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "fact_sales"
-                    }
-                  },
-                  "Property": "Sales"
-                }
-              },
-              "queryRef": "fact_sales.Sales",
-              "nativeQueryRef": "Sales"
             }
           ]
         }

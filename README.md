@@ -130,6 +130,12 @@ duplicates removed. Out of 128,614 rows only one was a duplicate, so the collect
 
 ![silver_sales columns and types](databricks/silver_schema.png)
 
+I then added a gold step (`databricks/silver_to_gold.py`) that builds the star schema the report
+needs: a sales fact plus an item and a date table, with the index fields worked out in the pipeline
+(each sale compared to its item's May baseline). The Power BI report reads straight from these gold
+tables over the Databricks SQL endpoint, so it runs end to end, raw to bronze to silver to gold to
+the report, instead of going through the CSV export.
+
 ## What I'd do next
 
 - a value-weighted version, so it shows how the total value of the market moved and not only the
@@ -156,3 +162,4 @@ repo.
 - `screenshots/` - one image per page
 - `databricks/bronze_to_silver.ipynb` - the bronze to silver notebook (PySpark), with the catalog
   and schema screenshots in the same folder
+- `databricks/silver_to_gold.py` - the gold step (PySpark) that builds the star schema the report reads
