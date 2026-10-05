@@ -25,8 +25,6 @@ The scrapers have been running 24/7 for over a year with very little downtime. T
 
 This report uses the May to September 2026 part of the data.
 
-The export from that store is the input for `build_dataset.py`.
-
 ## What's in the report
 
 The report has five pages.
@@ -118,23 +116,21 @@ Real sales data is messy, so every row gets flagged if:
 1,501 sales have at least one flag. They stay in the data and get reported on their own page, but
 extreme markups are kept out of the index.
 
-## Lakehouse version (Databricks)
+## The data pipeline (Databricks)
 
-I also loaded the same raw sales into Databricks (Free Edition) to try the bronze and silver setup.
-The raw export goes in as `bronze_sales`, exactly as collected. A PySpark notebook
-(`databricks/bronze_to_silver.ipynb`) turns it into `silver_sales`: proper types, wear and StatTrak
-pulled out of the item name, a data quality flag on every row instead of dropping anything, and
-duplicates removed. Out of 128,614 rows only one was a duplicate, so the collection itself is clean.
+The data runs through a medallion pipeline in Databricks. The raw sales land as `bronze_sales`,
+exactly as collected. A PySpark notebook (`databricks/bronze_to_silver.ipynb`) cleans that into
+`silver_sales`: proper types, wear and StatTrak pulled out of the item name, a data quality flag on
+every row instead of dropping anything, and duplicates removed. Out of 128,614 rows only one was a
+duplicate, so the collection itself is clean.
 
-![Catalog with both tables](databricks/catalog.png)
+![The Databricks catalog](databricks/catalog.png)
 
 ![silver_sales columns and types](databricks/silver_schema.png)
 
-I then added a gold step (`databricks/silver_to_gold.py`) that builds the star schema the report
-needs: a sales fact plus an item and a date table, with the index fields worked out in the pipeline
-(each sale compared to its item's May baseline). The Power BI report reads straight from these gold
-tables over the Databricks SQL endpoint, so it runs end to end, raw to bronze to silver to gold to
-the report, instead of going through the CSV export.
+A gold step (`databricks/silver_to_gold.py`) builds the star schema: a sales fact plus an item and a
+date table, with the index fields worked out in the pipeline (each sale compared to its item's May
+baseline). The Power BI report reads straight from these gold tables over the Databricks SQL endpoint.
 
 ## What I'd do next
 
@@ -151,14 +147,13 @@ Simple star schema:
 - `dim_item` - item name split into weapon, skin, wear, StatTrak, souvenir and category
 - `dim_date` - calendar table
 
-`build_dataset.py` turns the raw sales export into these three tables. The raw data isn't in this
-repo.
+The pipeline builds these three tables from the raw sales. The raw data isn't in this repo.
 
 ## Files
 
 - `CS2_Market_Index.pbip`, with the `CS2_Market_Index.Report` and `CS2_Market_Index.SemanticModel`
   folders next to it - the Power BI project (report plus semantic model)
-- `build_dataset.py` - the data prep (Python, pandas)
+- `build_dataset.py` - the same data prep in pandas
 - `screenshots/` - one image per page
 - `databricks/bronze_to_silver.ipynb` - the bronze to silver notebook (PySpark), with the catalog
   and schema screenshots in the same folder
