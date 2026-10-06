@@ -1,10 +1,15 @@
-# CS2 market index (Power BI)
+# CS2 market index (data pipeline to Power BI)
 
-I wanted to see how the CS2 item market actually moved over the summer, so I built a price index
-and a data quality report in Power BI on top of sales data I collected myself.
+I collect every completed sale from a CS2 item marketplace myself and run it through a pipeline into
+a Power BI report. I started it because I wanted to see how the market actually moved over the
+summer, and built the whole data side around that: scraping and storing the sales, cleaning and
+modelling them in a Databricks medallion pipeline, and a price index and data quality report on top.
 
-The data is 128,614 completed sales of 5,559 items on a CS2 item marketplace, from May to
-September 2026.
+The data is 128,614 completed sales of 5,559 items from a CS2 item marketplace, from May to
+September 2026, all collected by me.
+
+The flow is: scrapers to a raw export, then bronze, silver and gold tables in Databricks, then the
+Power BI report reads from the gold tables.
 
 ## Where the data comes from
 
@@ -24,6 +29,49 @@ The scrapers have been running 24/7 for over a year with very little downtime. T
 - I get an alert as soon as a source stops delivering data reliably
 
 This report uses the May to September 2026 part of the data.
+
+## The data pipeline (Databricks)
+
+The data runs through a medallion pipeline in Databricks. The raw sales land as `bronze_sales`,
+exactly as collected. A PySpark notebook (`databricks/bronze_to_silver.ipynb`) cleans that into
+`silver_sales`: proper types, wear and StatTrak pulled out of the item name, a data quality flag on
+every row instead of dropping anything, and duplicates removed. Out of 128,614 rows only one was a
+duplicate, so the collection itself is clean.
+
+![The Databricks catalog](databricks/catalog.png)
+
+![silver_sales columns and types](databricks/silver_schema.png)
+
+A gold step (`databricks/silver_to_gold.py`) builds the star schema: a sales fact plus an item and a
+date table, with the index fields worked out in the pipeline (each sale compared to its item's May
+baseline). The Power BI report reads straight from these gold tables over the Databricks SQL endpoint.
+
+## Data model
+
+Simple star schema:
+
+- `fact_sales` - one row per sale (price, markup, reference prices, liquidity, index fields, quality flags)
+- `dim_item` - item name split into weapon, skin, wear, StatTrak, souvenir and category
+- `dim_date` - calendar table
+
+The pipeline builds these three tables from the raw sales. The raw data isn't in this repo.
+
+## Data quality checks
+
+Real sales data is messy, so every row gets flagged if:
+
+- the reference price from Buff is missing
+- the CSFloat price is missing
+- the markup is extreme (above 100% or below -50%)
+- the price is more than 10x the Buff price
+
+1,501 sales have at least one flag. They stay in the data and get reported on their own page, but
+extreme markups are kept out of the index.
+
+## Tests
+
+The silver transformation has unit tests (pytest) in `tests/`, run through a GitHub Actions workflow.
+There are also a few SQL queries in `sql/` against the silver table on the Databricks SQL endpoint.
 
 ## What's in the report
 
@@ -142,50 +190,12 @@ falls. When an item drops below 40 its sales stop showing up in the data, so the
 the most leave the index exactly when prices go down. The real drop for the whole market is
 probably a bit bigger than 15%. For the segment above 40 the number holds.
 
-## Data quality checks
-
-Real sales data is messy, so every row gets flagged if:
-
-- the reference price from Buff is missing
-- the CSFloat price is missing
-- the markup is extreme (above 100% or below -50%)
-- the price is more than 10x the Buff price
-
-1,501 sales have at least one flag. They stay in the data and get reported on their own page, but
-extreme markups are kept out of the index.
-
-## The data pipeline (Databricks)
-
-The data runs through a medallion pipeline in Databricks. The raw sales land as `bronze_sales`,
-exactly as collected. A PySpark notebook (`databricks/bronze_to_silver.ipynb`) cleans that into
-`silver_sales`: proper types, wear and StatTrak pulled out of the item name, a data quality flag on
-every row instead of dropping anything, and duplicates removed. Out of 128,614 rows only one was a
-duplicate, so the collection itself is clean.
-
-![The Databricks catalog](databricks/catalog.png)
-
-![silver_sales columns and types](databricks/silver_schema.png)
-
-A gold step (`databricks/silver_to_gold.py`) builds the star schema: a sales fact plus an item and a
-date table, with the index fields worked out in the pipeline (each sale compared to its item's May
-baseline). The Power BI report reads straight from these gold tables over the Databricks SQL endpoint.
-
 ## What I'd do next
 
 - a value-weighted version, so it shows how the total value of the market moved and not only the
   typical item
 - the same index built on Buff reference prices instead of sale prices, as a check that the trend
   isn't just sellers changing their markups
-
-## Data model
-
-Simple star schema:
-
-- `fact_sales` - one row per sale (price, markup, reference prices, liquidity, index fields, quality flags)
-- `dim_item` - item name split into weapon, skin, wear, StatTrak, souvenir and category
-- `dim_date` - calendar table
-
-The pipeline builds these three tables from the raw sales. The raw data isn't in this repo.
 
 ## Files
 
